@@ -16,7 +16,7 @@
     "make": "electron-forge make",
     "release": "standard-version --no-verify --skip.tag --release-as patch",
     "deploy": "electron-forge publish",
-    "lint": "eslint . --ext js,ts",
+    "lint": "eslint . --ext js,ts --fix",
     "test": "jest"
   },
   "resolutions": {
