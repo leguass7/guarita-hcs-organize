@@ -40,7 +40,7 @@ Agradecimento especial pelo *boilerplate* à [Diego Fernades](https://github.com
 Referências:
  - https://github.com/diego3g/electron-typescript-react
  - https://github.com/diego3g/rocketredis
-
+ - https://github.com/jsoma/action-electron-forge
 ## Contributing
 
 Pull requests are always welcome 😃.
