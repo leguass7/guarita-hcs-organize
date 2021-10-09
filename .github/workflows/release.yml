@@ -2,14 +2,16 @@ name: Build/release
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: 
+     - main
   push:
-    branches: [ main ]
+    branches: 
+      - main
 
 jobs:
   release:
     if: github.event.pull_request.merged == 'true'
-    runs-on: ${{ matrix.os}}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [windows-latest] 
