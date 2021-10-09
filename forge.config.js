@@ -19,7 +19,8 @@ module.exports = {
       FileDescription: 'Organizador de arquivos para SD Card da Linear HCS',
       OriginalFilename: 'hcs-organize',
       ProductName: 'Avatar HCS Organize'
-    }
+    },
+    ignore: null
   },
   plugins: [
     [

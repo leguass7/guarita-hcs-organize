@@ -15,5 +15,6 @@
     "strict": false,
     "esModuleInterop": true,
   },
-  "include": ["src", "./src/@types/styled.d.ts"]
+  "exclude": ["node_modules"],
+  "include": ["src", "./src/@types/styled.d.ts","node_modules/@types"]
 }
