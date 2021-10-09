@@ -1,11 +1,14 @@
 name: Build/release
 
 on:
+  pull_request:
+    branches: main
   push:
     branches: [ main ]
 
 jobs:
   release:
+    if: github.event.pull_request.merged == 'true'
     runs-on: ${{ matrix.os}}
     strategy:
       matrix:
