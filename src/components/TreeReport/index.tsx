@@ -1,6 +1,7 @@
 import React, { useMemo, useCallback, useState } from 'react'
 
 import type { IReadedIndex } from '../../../electron/helpers/files'
+import { compareValues } from '../../helpers'
 import { useOrganize } from '../Organize/OrganizeProvider'
 import { PageTitle } from '../PageTitle'
 import { ToolBar } from '../ToolBar'
@@ -9,7 +10,7 @@ import { IPreparedTree, MainIndex } from './MainIndex'
 import { Setting } from './Setting'
 
 type Props = {
-  treeList: IReadedIndex[][]
+  treeList: IReadedIndex[]
 }
 
 export const TreeReport: React.FC<Props> = ({ treeList }) => {
@@ -18,21 +19,20 @@ export const TreeReport: React.FC<Props> = ({ treeList }) => {
 
   const preparedList: IPreparedTree[] = useMemo(() => {
     const result: IPreparedTree[] = []
-    treeList.forEach(items => {
-      items.forEach(item => {
-        const found = result.find(f => f.name === item.line1)
-        if (found) {
-          const duplicated = found.list.find(f => !!(f.dateDir === item.dateDir && f.timeDir === item.timeDir))
-          if (!duplicated) {
-            found.list.push(item)
-          }
-        } else {
-          result.push({
-            name: item.line1,
-            list: [item]
-          })
+    treeList.forEach(item => {
+      const found = result.find(f => f.name === item.line1)
+      if (found) {
+        const duplicated = found.list.find(f => !!(f.dateDir === item.dateDir && f.timeDir === item.timeDir))
+        if (!duplicated) {
+          found.list.push(item)
+          found.list = found.list.sort(compareValues('datetime', 'desc'))
         }
-      })
+      } else {
+        result.push({
+          name: item.line1,
+          list: [item]
+        })
+      }
     })
     return result
   }, [treeList])

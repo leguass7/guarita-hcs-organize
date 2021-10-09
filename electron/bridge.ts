@@ -1,7 +1,8 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
 
 import type { IReadedIndex, ITaskCopy } from './helpers/files'
 
+export type OnReadDirType = (event: IpcRendererEvent, file: IReadedIndex) => void
 export interface AppData {
   version: string
   name: string
@@ -76,6 +77,14 @@ export const api = {
     })
   },
 
+  registerReadDir(callback: OnReadDirType): void {
+    ipcRenderer.on('onReadDir', callback)
+  },
+
+  unregisterReadDir(callback: OnReadDirType): void {
+    ipcRenderer.removeListener('onReadDir', callback)
+  },
+
   /**
    * Provide an easier way to listen to events
    */
@@ -85,6 +94,10 @@ export const api = {
 
   once: (channel: string, callback: Function) => {
     ipcRenderer.once(channel, (_, data) => callback(data))
+  },
+
+  remove(channel: string, callback: (...args: any[]) => void) {
+    ipcRenderer.removeListener(channel, callback)
   }
 }
 

@@ -6,7 +6,7 @@ import type { IReadedIndex } from '../../../electron/helpers/files'
 import { useAppTheme } from '../AppTheme/useAppTheme'
 import { Container, ItemReportContainer, ItemReportName, Sup } from './styles'
 
-type ItemReportType = IReadedIndex & { selected?: boolean }
+type ItemReportType = IReadedIndex & { selected?: boolean; success?: boolean }
 export interface IPreparedTree {
   name: string
   list: ItemReportType[]
