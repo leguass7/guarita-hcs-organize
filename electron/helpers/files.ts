@@ -51,7 +51,7 @@ export function loadIndexFile(path: string): IReadedIndex[] {
           dateDir,
           timeDir,
           datetime: toDateTime(lines[i]),
-          line1: replaceAll(lines[i + 1], [':'], ' ') || timeStamp(),
+          line1: lines[i + 1] ? replaceAll(lines[i + 1], [':', '  '], ' ').replace(/\s+/g, ' ') : timeStamp(),
           line2: lines[i + 2] || ''
         }
         results.push(readed)
