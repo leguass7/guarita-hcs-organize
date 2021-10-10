@@ -1,7 +1,7 @@
+import { createHash } from 'crypto'
 import { parse, isValid, format } from 'date-fns'
 import { readdirSync, statSync, readFileSync, existsSync } from 'fs'
 import { join, resolve, dirname } from 'path'
-import { v4 as uuidV4 } from 'uuid'
 
 import { replaceAll, timeStamp } from './strings'
 
@@ -13,40 +13,87 @@ export interface IReadedIndex {
   datetime: Date
   line1: string
   line2: string
+  files?: string[]
 }
 
-const removeChars = "'@#$%¨&*()_+{}?^><|¹²³£¢¬§ªº°;.,~´`=-"
+const removeChars = "'!@#$%¨&*()_+{}?^><|¹²³£¢¬§ªº°;.,~´`=-"
 
 export function loadIndexFile(path: string): IReadedIndex[] {
+  const toDateTime = (str: string): Date => {
+    try {
+      return parse(str, 'yy/MM/dd HH:mm:ss', new Date())
+    } catch (error) {
+      console.warn('ERRO LEITURA DE DATETIME', path)
+      return null
+    }
+  }
+
   try {
     const lines = readFileSync(path, { encoding: 'utf-8' })
       ?.split(/\r?\n/)
       ?.map(l => {
-        return replaceAll(`${l}`.trim(), ['\x00', ...removeChars.split('')])
+        return replaceAll(`${l}`.trim(), ['\x00', '\x1f', '\x10', ...removeChars.split('')], ' ').trim()
       })
       .filter(f => f && f !== 'FFFFFFFFFFFFFFFFF')
 
     const results: IReadedIndex[] = []
     for (let i = 0; i < lines.length; i = i + 3) {
       const dateTime = lines[i].split(' ')
-      const dateDir = dateTime[0].split('/').join('_')
-      const timeDir = dateTime[1].split(':').join('_')
-      results.push({
-        id: uuidV4(),
-        inDir: dirname(path),
-        dateDir,
-        timeDir,
-        datetime: parse(lines[i], 'yy/MM/dd HH:mm:ss', new Date()),
-        line1: lines[i + 1] || timeStamp(),
-        line2: lines[i + 2] || ''
-      })
+      const inDir = dirname(path)
+      const dateDir = dateTime[0]?.split('/').join('_') || ''
+      const timeDir = dateTime[1]?.split(':').join('_') || ''
+      const report = resolve(inDir, dateDir, timeDir)
+      if (isDir(report)) {
+        const readed: IReadedIndex = {
+          id: createHash('md5').update(report).digest('hex'),
+          inDir,
+          dateDir,
+          timeDir,
+          datetime: toDateTime(lines[i]),
+          line1: lines[i + 1] || timeStamp(),
+          line2: lines[i + 2] || ''
+          // files: files
+        }
+        results.push(readed)
+      }
     }
 
     return results
   } catch (error) {
-    console.warn('ERRo LEITURA DE ARQUIVO', path)
+    // console.warn('ERRO LEITURA DE ARQUIVO INDEX', path)
     return []
   }
+}
+
+export function listFiles(pathDir: string): string[] {
+  try {
+    if (isDir(pathDir)) {
+      const list = readdirSync(pathDir)
+      return list
+        .map(fileName => {
+          const filePath = resolve(pathDir, fileName)
+          if (isFile(filePath)) return filePath
+          return ''
+        })
+        .filter(f => !!f)
+    }
+    return []
+  } catch (error) {
+    // console.warn('ERRO DE ARQUVOS', pathDir)
+    return []
+  }
+}
+
+export function isDir(path?: string): boolean {
+  if (!path) return false
+  if (!existsSync(path)) return false
+  return !!statSync(path).isDirectory()
+}
+
+export function isFile(path?: string): boolean {
+  if (!path) return false
+  if (!existsSync(path)) return false
+  return !!statSync(path).isFile()
 }
 
 export function hasIndexFile(dir: string, fileName: string): boolean {

@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 import { alpha } from '../helpers/colors'
 import { VariantColorsTypes } from './AppTheme/types'
@@ -41,7 +41,7 @@ export const SimpleText = styled.p<SimpleTextProps>`
   text-align: ${({ align = 'left' }) => align};
 `
 
-export const ActionButton = styled.button<MarginProps & ColorsProps>`
+export const ActionButton = styled.button<MarginProps & ColorsProps & { disabled?: boolean }>`
   max-width: 100%;
   width: 100%;
   word-break: break-all;
@@ -66,4 +66,11 @@ export const ActionButton = styled.button<MarginProps & ColorsProps>`
   &:hover {
     background-color: ${({ themeColor = 'secondary', theme }) => alpha(theme.colors[themeColor], 0.8)};
   }
+  ${({ disabled }) =>
+    disabled
+      ? css`
+          filter: grayscale(100%);
+          cursor: default;
+        `
+      : css``}
 `

@@ -1,5 +1,7 @@
 import { createGlobalStyle } from 'styled-components'
 
+import { circularProgressbar } from './circularProgressBar'
+
 export const GlobalStyle = createGlobalStyle`
   * {
     margin: 0;
@@ -30,4 +32,6 @@ export const GlobalStyle = createGlobalStyle`
     position: relative;
     border: 0;
   }
+  
+  ${circularProgressbar}
 `

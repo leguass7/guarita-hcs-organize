@@ -23,7 +23,7 @@ export const Sup = styled.sup`
 
 const highlight = keyframes`
   from{
-    background-color: #FFFFFFFF;
+    background-color: #FFFFFFE1;
     
   }
   to{
@@ -56,4 +56,11 @@ export const ItemReportName = styled.p<{ color?: string }>`
   display: block;
   font-size: 14px;
   color: ${({ theme, color }) => color || theme.colors.textDark};
+`
+
+export const Path = styled.p`
+  position: fixed;
+  right: 0;
+  top: 0;
+  padding: 3px 3px 3px 0;
 `

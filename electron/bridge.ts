@@ -1,7 +1,8 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
 
 import type { IReadedIndex, ITaskCopy } from './helpers/files'
 
+export type OnReadDirType = (event: IpcRendererEvent, file: IReadedIndex) => void
 export interface AppData {
   version: string
   name: string
@@ -32,12 +33,12 @@ export const api = {
     })
   },
 
-  sendOpenDir: async (): Promise<string[]> => {
+  sendOpenDir: async (defaultPath?: string): Promise<string[]> => {
     return new Promise<string[]>(resolve => {
       ipcRenderer.once('openedDirs', (_, data: string[] = []) => {
         return resolve(data)
       })
-      ipcRenderer.send('openDir')
+      ipcRenderer.send('openDir', defaultPath)
     }).catch(() => {
       return Promise.resolve([])
     })
@@ -76,6 +77,25 @@ export const api = {
     })
   },
 
+  processIndexFile: async (fileReaded: IReadedIndex, outDir: string): Promise<ITaskCopy> => {
+    return new Promise<ITaskCopy>(resolve => {
+      ipcRenderer.once(`processedFile-${fileReaded.id}`, (_, data: ITaskCopy) => {
+        return resolve(data)
+      })
+      ipcRenderer.send('processFile', fileReaded, outDir)
+    }).catch(() => {
+      return Promise.resolve(null)
+    })
+  },
+
+  registerReadDir(callback: OnReadDirType): void {
+    ipcRenderer.on('onReadDir', callback)
+  },
+
+  unregisterReadDir(callback: OnReadDirType): void {
+    ipcRenderer.removeListener('onReadDir', callback)
+  },
+
   /**
    * Provide an easier way to listen to events
    */
@@ -85,6 +105,10 @@ export const api = {
 
   once: (channel: string, callback: Function) => {
     ipcRenderer.once(channel, (_, data) => callback(data))
+  },
+
+  remove(channel: string, callback: (...args: any[]) => void) {
+    ipcRenderer.removeListener(channel, callback)
   }
 }
 
