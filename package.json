@@ -1,6 +1,6 @@
 {
   "name": "guarita-hcs-organize",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Organizador de arquivos para SD Card da Linear HCS",
   "main": "./.webpack/main/index.js",
   "author": {
