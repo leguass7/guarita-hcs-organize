@@ -1,66 +1,77 @@
-import React, { useMemo, useCallback, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 
-import type { IReadedIndex } from '../../../electron/helpers/files'
+import { IReadedIndex } from '../../../electron/helpers/files'
 import { compareValues } from '../../helpers'
 import { useOrganize } from '../Organize/OrganizeProvider'
 import { PageTitle } from '../PageTitle'
 import { ToolBar } from '../ToolBar'
 import { ToolButton } from '../ToolBar/ToolButton'
-import { IPreparedTree, MainIndex } from './MainIndex'
-import { Setting } from './Setting'
+import { IPreparedTree, ItemReportType, MainIndex } from './MainIndex'
+import { Path } from './styles'
 
-type Props = {
-  treeList: IReadedIndex[]
+type Props = {}
+
+function loadedIndexDto(list: IReadedIndex[]): IPreparedTree[] {
+  const result: IPreparedTree[] = []
+  list.forEach(item => {
+    const found = result.find(f => f.name === item.line1)
+    if (found) {
+      const duplicated = found.list.find(f => !!(f.dateDir === item.dateDir && f.timeDir === item.timeDir))
+      if (!duplicated) {
+        found.list.push(item)
+        found.list = found.list.sort(compareValues('datetime', 'desc'))
+      }
+    } else {
+      result.push({
+        name: item.line1,
+        list: [item]
+      })
+    }
+  })
+  return result
 }
 
-export const TreeReport: React.FC<Props> = ({ treeList }) => {
-  const [loading, setLoading] = useState(false)
-  const { processAllIndexFiles, outPath } = useOrganize()
-
-  const preparedList: IPreparedTree[] = useMemo(() => {
-    const result: IPreparedTree[] = []
-    treeList.forEach(item => {
-      const found = result.find(f => f.name === item.line1)
-      if (found) {
-        const duplicated = found.list.find(f => !!(f.dateDir === item.dateDir && f.timeDir === item.timeDir))
-        if (!duplicated) {
-          found.list.push(item)
-          found.list = found.list.sort(compareValues('datetime', 'desc'))
-        }
-      } else {
-        result.push({
-          name: item.line1,
-          list: [item]
-        })
-      }
-    })
-    return result
-  }, [treeList])
+export const TreeReport: React.FC<Props> = () => {
+  const [processing, setProcessing] = useState(false)
+  const [currentFile, setCurrentFile] = useState('')
+  const { outPath, loadedIndex, processIndexFile } = useOrganize()
+  const [listed] = useState(loadedIndexDto(loadedIndex))
 
   const handleProcessAll = useCallback(async () => {
-    setLoading(true)
-    const all = preparedList.reduce((acc, item) => {
-      item.list.forEach(i => acc.push(i))
-      return acc
-    }, [])
-    await processAllIndexFiles(all)
-    setLoading(false)
-  }, [preparedList, processAllIndexFiles])
+    setProcessing(true)
+    await Promise.all(
+      listed
+        .reduce((acc, item) => {
+          item.list.forEach(i => acc.push(i))
+          return acc
+        }, [])
+        .map(async (item: ItemReportType) => {
+          const task = await processIndexFile(item)
+          setCurrentFile(task.outDir)
+          return null
+        })
+    )
+    setProcessing(false)
+  }, [listed, processIndexFile])
 
   return (
     <>
       <PageTitle title="Relatórios">
-        {preparedList.length ? (
+        {listed.length ? (
           <ToolBar>
-            <ToolButton iconName="serverProc" size={24} onClick={handleProcessAll} disabled={!outPath || !!loading} />
+            <ToolButton
+              iconName="serverProc"
+              size={24}
+              onClick={handleProcessAll}
+              disabled={!outPath || !!processing}
+            />
           </ToolBar>
         ) : null}
       </PageTitle>
-      {preparedList.length ? <Setting disabled={!!loading} /> : null}
+      {currentFile && processing ? <Path>{currentFile}</Path> : null}
       <div>
-        {preparedList.map((item, i) => {
-          const key = `${i}`
-          return <MainIndex key={key} reports={item} />
+        {listed.map((item, i) => {
+          return <MainIndex key={`${item.name}`} reports={item} />
         })}
       </div>
     </>

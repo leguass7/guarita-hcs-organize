@@ -46,3 +46,21 @@ export async function processAll(
   )
   event.sender.send('processedAll', tasks)
 }
+
+export async function processFile(
+  mainWindow: BrowserWindow,
+  event: IpcMainEvent,
+  fileReaded: IReadedIndex,
+  outDir: string
+) {
+  const [task] = await Promise.all(
+    builderTasks([fileReaded]).map(async task => {
+      event.sender.send(`startProcessItem-${task.id}`)
+      const copied = await copyAllHCSFilesAsync(task.from, resolve(outDir, task.outDir))
+      const taskProcessed = { ...task, copied: copied.length }
+      event.sender.send(`processedItem-${task.id}`, taskProcessed)
+      return taskProcessed
+    })
+  )
+  event.sender.send(`processedFile-${task.id}`, task)
+}

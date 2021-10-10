@@ -1,7 +1,7 @@
+import { createHash } from 'crypto'
 import { parse, isValid, format } from 'date-fns'
 import { readdirSync, statSync, readFileSync, existsSync } from 'fs'
 import { join, resolve, dirname } from 'path'
-import { v4 as uuidV4 } from 'uuid'
 
 import { replaceAll, timeStamp } from './strings'
 
@@ -32,7 +32,7 @@ export function loadIndexFile(path: string): IReadedIndex[] {
     const lines = readFileSync(path, { encoding: 'utf-8' })
       ?.split(/\r?\n/)
       ?.map(l => {
-        return replaceAll(`${l}`.trim(), ['\x00', '\x1f', ...removeChars.split('')], ' ').trim()
+        return replaceAll(`${l}`.trim(), ['\x00', '\x1f', '\x10', ...removeChars.split('')], ' ').trim()
       })
       .filter(f => f && f !== 'FFFFFFFFFFFFFFFFF')
 
@@ -45,7 +45,7 @@ export function loadIndexFile(path: string): IReadedIndex[] {
       const report = resolve(inDir, dateDir, timeDir)
       if (isDir(report)) {
         const readed: IReadedIndex = {
-          id: uuidV4(),
+          id: createHash('md5').update(report).digest('hex'),
           inDir,
           dateDir,
           timeDir,
@@ -60,7 +60,7 @@ export function loadIndexFile(path: string): IReadedIndex[] {
 
     return results
   } catch (error) {
-    console.warn('ERRO LEITURA DE ARQUIVO INDEX', path)
+    // console.warn('ERRO LEITURA DE ARQUIVO INDEX', path)
     return []
   }
 }
@@ -79,7 +79,7 @@ export function listFiles(pathDir: string): string[] {
     }
     return []
   } catch (error) {
-    console.warn('ERRO DE ARQUVOS', pathDir)
+    // console.warn('ERRO DE ARQUVOS', pathDir)
     return []
   }
 }

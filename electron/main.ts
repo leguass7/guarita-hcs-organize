@@ -3,7 +3,7 @@ import { join } from 'path'
 import update from 'update-electron-app'
 
 import type { IReadedIndex } from './helpers/files'
-import { findIndexies, loadIndexies, processAll } from './listeners/fileIndexies'
+import { findIndexies, loadIndexies, processAll, processFile } from './listeners/fileIndexies'
 import { openDir } from './listeners/openDir'
 
 if (require('electron-squirrel-startup')) app.quit()
@@ -53,9 +53,12 @@ async function registerListeners() {
   ipcMain.on('appVersion', event => {
     event.sender.send('appVersion', { version: app.getVersion(), name: app.getName(), path: app.getAppPath() })
   })
-  ipcMain.on('openDir', async event => openDir(mainWindow!, event))
+  ipcMain.on('openDir', async (event, defaultPath?: string) => openDir(mainWindow!, event, defaultPath))
   ipcMain.on('findIndexies', async (event, path: string) => findIndexies(mainWindow!, event, path))
   ipcMain.on('loadIndexies', async (event, paths: string[]) => loadIndexies(mainWindow!, event, paths))
+  ipcMain.on('processFile', async (event, fileReaded: IReadedIndex, outDir: string) =>
+    processFile(mainWindow!, event, fileReaded, outDir)
+  )
   ipcMain.on('processAll', async (event, list: IReadedIndex[], outDir: string) =>
     processAll(mainWindow!, event, list, outDir)
   )

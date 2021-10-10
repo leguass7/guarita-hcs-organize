@@ -3,14 +3,14 @@ import React from 'react'
 import { AppContainer } from '../../AppContainer'
 import { TreeReport } from '../../TreeReport'
 import { CircularProgressFiles } from '../CircularProgressFiles'
-import { useOrganize } from '../OrganizeProvider'
+import { useOrganizeLoading } from '../OrganizeProvider'
 
 export const SideLoaded: React.FC = () => {
-  const { loadedIndex, loading } = useOrganize()
+  const [loading] = useOrganizeLoading()
 
   return (
     <AppContainer horizontalSpaced verticalSpaced>
-      {loading ? <CircularProgressFiles /> : <TreeReport treeList={loadedIndex} />}
+      {loading ? <CircularProgressFiles /> : <TreeReport />}
     </AppContainer>
   )
 }

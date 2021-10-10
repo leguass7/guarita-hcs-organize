@@ -33,12 +33,12 @@ export const api = {
     })
   },
 
-  sendOpenDir: async (): Promise<string[]> => {
+  sendOpenDir: async (defaultPath?: string): Promise<string[]> => {
     return new Promise<string[]>(resolve => {
       ipcRenderer.once('openedDirs', (_, data: string[] = []) => {
         return resolve(data)
       })
-      ipcRenderer.send('openDir')
+      ipcRenderer.send('openDir', defaultPath)
     }).catch(() => {
       return Promise.resolve([])
     })
@@ -74,6 +74,17 @@ export const api = {
       ipcRenderer.send('processAll', list, outDir)
     }).catch(() => {
       return Promise.resolve([])
+    })
+  },
+
+  processIndexFile: async (fileReaded: IReadedIndex, outDir: string): Promise<ITaskCopy> => {
+    return new Promise<ITaskCopy>(resolve => {
+      ipcRenderer.once(`processedFile-${fileReaded.id}`, (_, data: ITaskCopy) => {
+        return resolve(data)
+      })
+      ipcRenderer.send('processFile', fileReaded, outDir)
+    }).catch(() => {
+      return Promise.resolve(null)
     })
   },
 

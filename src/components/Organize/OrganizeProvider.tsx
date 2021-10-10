@@ -1,8 +1,9 @@
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { createContext, useContextSelector, useContext } from 'use-context-selector'
 
-import { OnReadDirType } from '../../../electron/bridge'
+import type { OnReadDirType } from '../../../electron/bridge'
 import type { IReadedIndex } from '../../../electron/helpers/files'
-import { IOrganizeContext } from './types'
+import type { IOrganizeContext } from './types'
 
 export const OrganizeContext = createContext<IOrganizeContext>({} as IOrganizeContext)
 
@@ -33,7 +34,17 @@ export const OrganizeProvider: React.FC = ({ children }) => {
 
   const processAllIndexFiles = useCallback(
     async (list: IReadedIndex[], outDir?: string) => {
+      setLoading(true)
       const processed = await window.Main.processAllIndexFiles(list, outDir || outPath)
+      setLoading(false)
+      return processed
+    },
+    [outPath]
+  )
+
+  const processIndexFile = useCallback(
+    async (readedFile: IReadedIndex, outDir?: string) => {
+      const processed = await window.Main.processIndexFile(readedFile, outDir || outPath)
       return processed
     },
     [outPath]
@@ -49,14 +60,23 @@ export const OrganizeProvider: React.FC = ({ children }) => {
   useEffect(() => {
     if (!refRegister.current) {
       window.Main.registerReadDir(onReadFile)
-      console.log('REGISTREI')
     }
     return () => window.Main.unregisterReadDir(onReadFile)
   }, [onReadFile])
 
   return (
     <OrganizeContext.Provider
-      value={{ loading, findFileIndexies, loadedIndex, clearLoadedIndex, processAllIndexFiles, outPath, setOutPath }}
+      value={{
+        loading,
+        findFileIndexies,
+        loadedIndex,
+        clearLoadedIndex,
+        processAllIndexFiles,
+        outPath,
+        setOutPath,
+        processIndexFile,
+        setLoading
+      }}
     >
       {children}
     </OrganizeContext.Provider>
@@ -64,7 +84,31 @@ export const OrganizeProvider: React.FC = ({ children }) => {
 }
 
 export function useOrganize() {
-  const { findFileIndexies, loadedIndex, processAllIndexFiles, outPath, setOutPath, loading, clearLoadedIndex } =
-    useContext(OrganizeContext)
-  return { findFileIndexies, loadedIndex, processAllIndexFiles, outPath, setOutPath, loading, clearLoadedIndex }
+  const {
+    findFileIndexies,
+    loadedIndex,
+    processAllIndexFiles,
+    outPath,
+    setOutPath,
+    loading,
+    clearLoadedIndex,
+    setLoading,
+    processIndexFile
+  } = useContext(OrganizeContext)
+  return {
+    findFileIndexies,
+    loadedIndex,
+    processAllIndexFiles,
+    outPath,
+    setOutPath,
+    loading,
+    clearLoadedIndex,
+    setLoading,
+    processIndexFile
+  }
+}
+
+export function useOrganizeLoading() {
+  const loading = useContextSelector(OrganizeContext, context => !!context.loading)
+  return [loading]
 }
