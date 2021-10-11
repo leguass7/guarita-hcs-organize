@@ -17,6 +17,7 @@ export interface IReadedIndex {
 }
 
 const removeChars = "'!@#$%¨&*()_+{}?^><|¹²³£¢¬§ªº°;.,~´`=-"
+const hexChars = ['\x00', '\x01', '\x1f', '\x10', '\x22', '\x5c']
 
 export function loadIndexFile(path: string): IReadedIndex[] {
   const toDateTime = (str: string): Date => {
@@ -32,7 +33,7 @@ export function loadIndexFile(path: string): IReadedIndex[] {
     const lines = readFileSync(path, { encoding: 'utf-8' })
       ?.split(/\r?\n/)
       ?.map(l => {
-        return replaceAll(`${l}`.trim(), ['\x00', '\x1f', '\x10', ...removeChars.split('')], ' ').trim()
+        return replaceAll(`${l}`.trim(), [...hexChars, ...removeChars.split('')], ' ').trim()
       })
       .filter(f => f && f !== 'FFFFFFFFFFFFFFFFF')
 
@@ -50,9 +51,8 @@ export function loadIndexFile(path: string): IReadedIndex[] {
           dateDir,
           timeDir,
           datetime: toDateTime(lines[i]),
-          line1: lines[i + 1] || timeStamp(),
+          line1: lines[i + 1] ? lines[i + 1].replace(/\s+/g, ' ').replace(/[^a-z0-9]/gi, ' ') : timeStamp(),
           line2: lines[i + 2] || ''
-          // files: files
         }
         results.push(readed)
       }
