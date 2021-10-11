@@ -5,7 +5,7 @@ import { GlobalStyle } from './styles/GlobalStyle'
 import { appTheme } from './styles/theme'
 
 export function App() {
-  //...
+  // ...
   return (
     <AppTheme theme={appTheme}>
       <AppVersion />
