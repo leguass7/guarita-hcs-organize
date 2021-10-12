@@ -7,3 +7,4 @@ webpack/*.js
 out
 
 ./prettier.config.js
+**/database/generated/**
