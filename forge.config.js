@@ -3,7 +3,7 @@ require('dotenv').config()
 
 const packageJson = require('./package.json')
 const { version, name } = packageJson
-const iconDir = path.resolve(__dirname, 'assets')
+const assetsDir = path.resolve(__dirname, 'assets')
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN
 
@@ -19,8 +19,9 @@ module.exports = {
       FileDescription: 'Organizador de arquivos para SD Card da Linear HCS',
       OriginalFilename: 'hcs-organize',
       ProductName: 'Avatar HCS Organize'
-    },
-    ignore: null
+    }
+    // ignore: null,
+    // ignore: ['.+.test.js', '.*.env', '.eslintrc', '.gitignore', 'README.md', 'yarn.lock', '.jshintrc', '.babelrc']
   },
   plugins: [
     [
@@ -54,7 +55,9 @@ module.exports = {
           exe: 'hcs-organize.exe',
           noMsi: true,
           setupExe: `hcs-organize-${version}-win32-${arch}-setup.exe`,
-          setupIcon: path.resolve(iconDir, 'favicon.ico')
+          setupIcon: path.resolve(assetsDir, 'favicon.ico'),
+          loadingGif: path.resolve(assetsDir, 'app.gif'),
+          iconUrl: 'https://sindico.avatarsolucoesdigitais.com.br/favicon.png'
         }
       }
     },
