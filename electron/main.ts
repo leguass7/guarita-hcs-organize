@@ -28,6 +28,7 @@ function createWindow() {
     width: 1100,
     height: 700,
     backgroundColor: '#191622',
+    autoHideMenuBar: process.env.NODE_ENV === 'production',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
