@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import update from 'update-electron-app'
 
+import { registerDatabaseHandlers } from './database/database.bridge'
 import type { IReadedIndex } from './helpers/files'
 import { findIndexies, loadIndexies, processAll, processFile } from './listeners/fileIndexies'
 import { openDir } from './listeners/openDir'
@@ -10,10 +11,7 @@ if (require('electron-squirrel-startup')) app.quit()
 
 app.setAppUserModelId('com.squirrel.hcsorganize.HcsOrganize')
 
-update({
-  updateInterval: '5 minutes',
-  logger: require('electron-log')
-})
+update({ updateInterval: '10 minutes', logger: require('electron-log') })
 
 let mainWindow: BrowserWindow | null
 
@@ -63,6 +61,9 @@ async function registerListeners() {
   ipcMain.on('processAll', async (event, list: IReadedIndex[], outDir: string) =>
     processAll(mainWindow!, event, list, outDir)
   )
+
+  /** Database */
+  registerDatabaseHandlers()
 }
 
 app

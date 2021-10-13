@@ -27,6 +27,16 @@ export const SideSummary: React.FC = () => {
     }
   }, [setOutPath, outPath])
 
+  const handleTeste = useCallback(async () => {
+    const r = await window.Main.database.modules.findAll()
+    console.log('forntend r', r)
+  }, [])
+
+  const handleCreate = useCallback(async () => {
+    const r = await window.Main.database.modules.create({ id: 123456, name: 'TESTE 1' })
+    console.log('forntend created', r)
+  }, [])
+
   return (
     <AppContainer horizontalSpaced>
       <SimpleText verticalSpaced color={theme.colors.textDark} size={14}>
@@ -65,6 +75,9 @@ export const SideSummary: React.FC = () => {
           <strong>Nenhum arquivo de índice HCS encontrado</strong>
         </SimpleText>
       ) : null}
+
+      <ActionButton onClick={handleTeste}>{'READ'}</ActionButton>
+      <ActionButton onClick={handleCreate}>{'WRITE'}</ActionButton>
     </AppContainer>
   )
 }

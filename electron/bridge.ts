@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
 
+import { databaseBridge } from './database/database.bridge'
 import type { IReadedIndex, ITaskCopy } from './helpers/files'
 
 export type OnReadDirType = (event: IpcRendererEvent, file: IReadedIndex) => void
@@ -14,14 +16,7 @@ export const api = {
    * Here you can expose functions to the renderer process
    * so they can interact with the main (electron) side
    * without security problems.
-   *
-   * The function below can accessed using `window.Main.sayHello`
    */
-
-  sendMessage: (message: string) => {
-    ipcRenderer.send('message', message)
-  },
-
   getAppVersion: async () => {
     return new Promise<AppData>(resolve => {
       ipcRenderer.once('appVersion', (_, data: AppData) => {
@@ -109,7 +104,12 @@ export const api = {
 
   remove(channel: string, callback: (...args: any[]) => void) {
     ipcRenderer.removeListener(channel, callback)
-  }
+  },
+
+  /**
+   * Database handlers
+   */
+  database: databaseBridge
 }
 
 contextBridge.exposeInMainWorld('Main', api)
