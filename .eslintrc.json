@@ -7,7 +7,8 @@
   },
   "extends": [
     "standard",
-    "prettier"
+    "prettier",
+    "plugin:@typescript-eslint/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -22,16 +23,17 @@
     "prettier",
     "react-hooks",
     "jsx-a11y",
-    "import-helpers",
-    "@typescript-eslint"
+    "import-helpers"
   ],
-  "ignorePatterns": "**/database/generated/**",
   "rules": {
     "prettier/prettier": "error",
     "no-use-before-define": "off",
     "react/prop-types": "off",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
     "import-helpers/order-imports": ["warn", {
       "newlinesBetween": "always",
       "alphabetize": {
